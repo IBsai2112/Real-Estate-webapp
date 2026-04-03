@@ -1,18 +1,63 @@
-.App{
-  position: relative;
-  overflow-x: clip;
-  background-color: white;
+:root {
+  --black: #131110;
+  --primary-color: #4066ff;
+  --secondary-color: rgba(255, 255, 255, 0.522);
+  --glass-gradient: linear-gradient(
+    155deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0) 100%
+  );
 }
-.App>:nth-child(1)
-{
+
+.App {
+  position: relative;
+  overflow-x: clip; /* Prevents horizontal scroll from glowing spheres */
+  background-color: white;
+  min-height: 100vh;
+  color: var(--black);
+}
+
+/* Header/Hero Section Background */
+.App > :nth-child(1) {
   background: var(--black);
   position: relative;
+  /* Added a slight shadow to separate from the white body */
+  box-shadow: 0px 4px 30px rgba(0, 0, 0, 0.05);
+  z-index: 1;
 }
-.white-gradient{
+
+/* Enhanced White Gradient */
+.white-gradient {
   position: absolute;
-  width: 20rem;
-  height: 20rem;
-  background: rgba(255, 255, 255, 0.522);
+  width: 25rem;
+  height: 25rem;
+  background: var(--secondary-color);
   filter: blur(100px);
-  border-radius: 100px;
+  border-radius: 50%; /* Changed to 50% for a perfect circle */
+  z-index: -1;
+  pointer-events: none; /* Ensures the gradient doesn't block clicks */
+}
+
+/* Added Detail: Blue Accent Gradient for depth */
+.blue-gradient {
+  position: absolute;
+  width: 15rem;
+  height: 15rem;
+  background: var(--primary-color);
+  filter: blur(150px);
+  border-radius: 50%;
+  opacity: 0.4;
+  z-index: -1;
+}
+
+/* Utility Class for inner containers */
+.innerWidth {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+/* Smooth scrolling for the whole app */
+html {
+  scroll-behavior: smooth;
 }

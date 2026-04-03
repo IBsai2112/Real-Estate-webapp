@@ -25,4 +25,6 @@ const Website = () => {
   )
 }
 
+// updataing the favourites and properties and booking pages
+
 export default Website
