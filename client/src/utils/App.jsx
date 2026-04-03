@@ -1,7 +1,6 @@
 import { Suspense, useState } from "react";
 import "./App.css";
 import Layout from "./components/Layout/Layout";
-
 import Website from "./pages/Website";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Properties from "./pages/Properties/Properties";
@@ -14,9 +13,17 @@ import UserDetailContext from "./context/UserDetailContext";
 import Bookings from "./pages/Bookings/Bookings";
 import Favourites from "./pages/Favourites/Favourites";
 
-function App() {
-  const queryClient = new QueryClient();
+// 1. Move QueryClient outside to prevent cache reset on re-renders
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
+function App() {
   const [userDetails, setUserDetails] = useState({
     favourites: [],
     bookings: [],
@@ -29,19 +36,31 @@ function App() {
         <BrowserRouter>
           <Suspense fallback={<div>Loading...</div>}>
             <Routes>
+              {/* Main Layout wrapper for all routes */}
               <Route element={<Layout />}>
                 <Route path="/" element={<Website />} />
+                
+                {/* Nested Routes for Properties */}
                 <Route path="/properties">
                   <Route index element={<Properties />} />
                   <Route path=":propertyId" element={<Property />} />
                 </Route>
+                
+                {/* Direct paths for Bookings and Favourites */}
                 <Route path="/bookings" element={<Bookings />} />
                 <Route path="/favourites" element={<Favourites />} />
               </Route>
             </Routes>
           </Suspense>
         </BrowserRouter>
-        <ToastContainer />
+        
+        {/* Global UI Components */}
+        <ToastContainer 
+          position="bottom-right" 
+          autoClose={3000} 
+          pauseOnHover 
+          theme="dark" 
+        />
         <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
     </UserDetailContext.Provider>
