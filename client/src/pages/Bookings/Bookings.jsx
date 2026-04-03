@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useMemo } from "react";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import useProperties from "../../hooks/useProperties";
 import { PuffLoader } from "react-spinners";
@@ -12,6 +12,22 @@ const Bookings = () => {
   const {
     userDetails: { bookings },
   } = useContext(UserDetailContext);
+
+  // 1. Memoize filtered data to prevent unnecessary re-calculations on every re-render
+  const filteredBookings = useMemo(() => {
+    if (!data || !bookings) return [];
+
+    // Create a Set of IDs for O(1) lookup efficiency
+    const bookedIds = new Set(bookings.map((b) => b.id));
+
+    return data
+      .filter((property) => bookedIds.has(property.id))
+      .filter((property) =>
+        [property.title, property.city, property.country].some((field) =>
+          field.toLowerCase().includes(filter.toLowerCase())
+        )
+      );
+  }, [data, bookings, filter]);
 
   if (isError) {
     return (
@@ -34,30 +50,22 @@ const Bookings = () => {
       </div>
     );
   }
+
   return (
     <div className="wrapper">
       <div className="flexColCenter paddings innerWidth properties-container">
         <SearchBar filter={filter} setFilter={setFilter} />
 
         <div className="paddings flexCenter properties">
-          {
-            // data.map((card, i)=> (<PropertyCard card={card} key={i}/>))
-
-            data
-              .filter((property) =>
-                bookings.map((booking) => booking.id).includes(property.id)
-              )
-
-              .filter(
-                (property) =>
-                  property.title.toLowerCase().includes(filter.toLowerCase()) ||
-                  property.city.toLowerCase().includes(filter.toLowerCase()) ||
-                  property.country.toLowerCase().includes(filter.toLowerCase())
-              )
-              .map((card, i) => (
-                <PropertyCard card={card} key={i} />
-              ))
-          }
+          {filteredBookings.length > 0 ? (
+            filteredBookings.map((card, i) => (
+              <PropertyCard card={card} key={card.id || i} />
+            ))
+          ) : (
+            <div className="flexCenter" style={{ marginTop: "2rem" }}>
+              <span>No bookings found matching your criteria.</span>
+            </div>
+          )}
         </div>
       </div>
     </div>
