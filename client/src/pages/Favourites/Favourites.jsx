@@ -17,22 +17,24 @@ const Favourites = () => {
   const filteredProperties = useMemo(() => {
     if (!data) return [];
 
+    // DETAIL: Using a Set for O(1) lookup efficiency instead of .includes() O(n)
+    const favoriteSet = new Set(favourites || []);
+    const searchStr = filter.toLowerCase().trim();
+
     return data
-      .filter((property) => favourites?.includes(property.id))
-      .filter((property) => {
-        const searchStr = filter.toLowerCase();
-        return (
-          property.title.toLowerCase().includes(searchStr) ||
-          property.city.toLowerCase().includes(searchStr) ||
-          property.country.toLowerCase().includes(searchStr)
-        );
-      });
+      .filter((property) => favoriteSet.has(property.id))
+      .filter((property) => 
+        // Cleaner checking using .some() for better readability
+        [property?.title, property?.city, property?.country].some(field => 
+          field?.toLowerCase().includes(searchStr)
+        )
+      );
   }, [data, favourites, filter]);
 
   if (isError) {
     return (
-      <div className="wrapper">
-        <span>Error while fetching data</span>
+      <div className="wrapper flexCenter" style={{ height: "60vh" }}>
+        <span>Error while fetching data. Please try again later.</span>
       </div>
     );
   }
@@ -62,8 +64,12 @@ const Favourites = () => {
               <PropertyCard card={card} key={card.id} />
             ))
           ) : (
-            <div className="flexCenter" style={{ marginTop: "2rem", opacity: 0.6 }}>
-              <span>No favorite properties found.</span>
+            <div className="flexCenter" style={{ marginTop: "4rem", opacity: 0.6 }}>
+              <h3>
+                {filter 
+                  ? `No favorites match "${filter}"` 
+                  : "You haven't added any favorites yet!"}
+              </h3>
             </div>
           )}
         </div>
