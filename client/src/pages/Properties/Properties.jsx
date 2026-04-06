@@ -9,28 +9,30 @@ const Properties = () => {
   const { data, isError, isLoading } = useProperties();
   const [filter, setFilter] = useState("");
 
-  // Memoize filtered results for better performance
+  // Memoize filtered results to ensure smooth typing in SearchBar
   const filteredProperties = useMemo(() => {
     if (!data) return [];
     
-    const searchStr = filter.toLowerCase();
+    const searchStr = filter.toLowerCase().trim();
     
-    return data.filter(
-      (property) =>
-        property.title.toLowerCase().includes(searchStr) ||
-        property.city.toLowerCase().includes(searchStr) ||
-        property.country.toLowerCase().includes(searchStr)
+    return data.filter((property) => 
+      // Check multiple fields using .some() for cleaner code
+      [property?.title, property?.city, property?.country].some((field) => 
+        field?.toLowerCase().includes(searchStr)
+      )
     );
   }, [data, filter]);
 
+  // Error State
   if (isError) {
     return (
-      <div className="wrapper">
-        <span>Error while fetching data</span>
+      <div className="wrapper flexCenter" style={{ height: "60vh" }}>
+        <span>Error while fetching data. Please try again later.</span>
       </div>
     );
   }
 
+  // Loading State
   if (isLoading) {
     return (
       <div className="wrapper flexCenter" style={{ height: "60vh" }}>
@@ -48,6 +50,7 @@ const Properties = () => {
   return (
     <div className="wrapper">
       <div className="flexColCenter paddings innerWidth properties-container">
+        {/* Search functionality */}
         <SearchBar filter={filter} setFilter={setFilter} />
 
         <div className="paddings flexCenter properties">
@@ -56,8 +59,8 @@ const Properties = () => {
               <PropertyCard card={card} key={card.id} />
             ))
           ) : (
-            <div className="flexCenter" style={{ marginTop: "2rem", opacity: 0.7 }}>
-              <span>No properties found matching your search.</span>
+            <div className="flexCenter" style={{ marginTop: "4rem", opacity: 0.6 }}>
+              <h3>No properties found matching "{filter}"</h3>
             </div>
           )}
         </div>
