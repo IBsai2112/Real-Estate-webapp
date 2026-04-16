@@ -1,37 +1,45 @@
- import React, { useState, useMemo, useEffect } from "react";
+import React, { useContext, useState, useMemo, useEffect } from "react";
 import SearchBar from "../../components/SearchBar/SearchBar";
-import "./Properties.css";
 import useProperties from "../../hooks/useProperties";
 import { PuffLoader } from "react-spinners";
 import PropertyCard from "../../components/PropertyCard/PropertyCard";
-import { motion } from "framer-motion"; // For smooth entry animations
+import "../Properties/Properties.css";
+import UserDetailContext from "../../context/UserDetailContext";
+import { motion } from "framer-motion";
 
-const Properties = () => {
+const Bookings = () => {
   const { data, isError, isLoading } = useProperties();
   const [filter, setFilter] = useState("");
+  const {
+    userDetails: { bookings },
+  } = useContext(UserDetailContext);
 
-  // DETAIL: Ensure the user starts at the top of the list when navigating here
+  // DETAIL: Reset scroll position when page loads
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  // Memoize filtered results to ensure smooth typing in SearchBar
-  const filteredProperties = useMemo(() => {
-    if (!data) return [];
-    
+  // Memoize filtered results for performance
+  const filteredBookings = useMemo(() => {
+    if (!data || !bookings) return [];
+
+    // DETAIL: Create a Set of booked IDs for O(1) lookup speed
+    const bookedIds = new Set(bookings.map((booking) => booking.id));
     const searchStr = filter.toLowerCase().trim();
-    
-    return data.filter((property) => 
-      [property?.title, property?.city, property?.country].some((field) => 
-        field?.toLowerCase().includes(searchStr)
-      )
-    );
-  }, [data, filter]);
+
+    return data
+      .filter((property) => bookedIds.has(property.id))
+      .filter((property) =>
+        [property?.title, property?.city, property?.country].some((field) =>
+          field?.toLowerCase().includes(searchStr)
+        )
+      );
+  }, [data, bookings, filter]);
 
   if (isError) {
     return (
       <div className="wrapper flexCenter" style={{ height: "60vh" }}>
-        <span className="errorText">Error while fetching data. Please try again later.</span>
+        <span className="errorText">Error while fetching your bookings. Please try again.</span>
       </div>
     );
   }
@@ -53,23 +61,23 @@ const Properties = () => {
   return (
     <div className="wrapper">
       <div className="flexColCenter paddings innerWidth properties-container">
-        {/* DETAIL: Page Heading for better structure */}
+        {/* DETAIL: Consistent header styling */}
         <div className="flexColStart p-header" style={{ width: "100%", gap: "0.5rem" }}>
-          <span className="orangeText">Our Listings</span>
-          <span className="primaryText">Discover Best Properties</span>
+          <span className="orangeText">My Trips</span>
+          <span className="primaryText">Booked Properties</span>
         </div>
 
         <SearchBar filter={filter} setFilter={setFilter} />
 
         <div className="paddings flexCenter properties">
-          {filteredProperties.length > 0 ? (
-            filteredProperties.map((card, index) => (
-              /* DETAIL: Staggered entry animation for a premium feel */
+          {filteredBookings.length > 0 ? (
+            filteredBookings.map((card, index) => (
+              /* DETAIL: Staggered entry animation */
               <motion.div
                 key={card.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: index * 0.05 }}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3, delay: index * 0.1 }}
               >
                 <PropertyCard card={card} />
               </motion.div>
@@ -78,10 +86,14 @@ const Properties = () => {
             <div className="flexCenter empty-message" style={{ marginTop: "4rem" }}>
               <div className="flexColCenter">
                 <span className="secondaryText" style={{ fontSize: "1.5rem" }}>
-                  Oops! No matches for "{filter}"
+                  {filter 
+                    ? `No bookings match "${filter}"` 
+                    : "You haven't booked any properties yet!"}
                 </span>
                 <p style={{ marginTop: "1rem", color: "#8c8c8c" }}>
-                  Try checking your spelling or using different keywords.
+                  {filter 
+                    ? "Try adjusting your search filters." 
+                    : "Explore our listings and find your next stay!"}
                 </p>
               </div>
             </div>
@@ -92,4 +104,4 @@ const Properties = () => {
   );
 };
 
-export default Properties;
+export default Bookings;
