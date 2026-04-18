@@ -22,3 +22,44 @@
         justify-content: center;
     }
 }
+.logo-container {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+}
+
+.text-logo {
+  /* DETAIL: Increased size and ultra-bold weight */
+  font-size: 2.5rem; /* Larger, more impactful size */
+  font-weight: 800;  /* Extra Bold */
+  color: var(--black, #131110);
+  
+  /* DETAIL: Tight letter spacing makes it look like a graphic, not just text */
+  letter-spacing: -1.5px; 
+  display: flex;
+  align-items: center;
+  line-height: 1;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+/* Styling the "Plots" part specifically */
+.text-logo span {
+  color: var(--primary-color, #4066ff); /* Using your primary blue */
+  font-weight: 600; /* Slightly thinner than 'Vision' for visual contrast */
+  margin-left: 1px;
+}
+
+/* Hover effect to make it feel interactive */
+.logo-container:hover .text-logo {
+  transform: scale(1.02);
+  filter: brightness(1.1);
+}
+
+/* Mobile responsive scaling */
+@media (max-width: 768px) {
+  .text-logo {
+    font-size: 1.8rem;
+    letter-spacing: -1px;
+  }
+}
